@@ -31,10 +31,10 @@ questions = [
     "3. Ma’lumotingiz (o‘quv yurt nomi, yil, mutaxassislik)?",
     "4. Shu sohadagi tajribangiz (oy, yil)?",
     "5. Qaysi chet tillarini bilasiz?",
-    "6. Oilaviy ahvolingiz?",
+    "6. Oilaviy ahvolingiz (uylangan/turmushga chiqqan, yo’q)",
     "7. Farzandlaringiz bormi (soni, jinsi)?",
-    "8. Texnik qobiliyatlaringiz?",
-    "9. Insoniy qobiliyatlaringiz?",
+    "8. Texnik qobiliyatlaringiz (kompyuter dasturlarini ishlata olasiz)?",
+    "9. Insoniy qobilyatlaringiz (ko’nikuvchan, kirishuvchan, intiluvchan, qiziquvchan va h.k)?",
     "10. Qaysi tashkilot yoki muassasalarda ishlagansiz?",
     "11. Ish tajribangiz (lavozim, maosh)?",
     "12. Ishdan ketish sabablari?",
@@ -42,11 +42,10 @@ questions = [
     "14. Qancha maosh kutyapsiz?",
     "15. OrzuTech bilan bir yildan keyin o‘zingizni qanday tasavvur qilasiz?",
     "16. Nimalarga qiziqasiz (hobbingiz)?",
-    "17. Haydovchilik guvohnomangiz bormi?",
+    "17. Haydovchilik guvohnomangiz bormi (toifa, berilgan sana)?",
     "18. Kelayotgan ikki yildagi eng muhim rejalaringiz?",
-    "19. Siz uchun eng muhimi?",
+    "19. Siz uchun eng muhimi (mansab, insoniylik, halollik, pul va b)?",
     "20. So‘rovnoma to‘ldirilgan sana?",
-    "21. Bog‘lanish uchun telefon raqamingiz?",
 ]
 
 
