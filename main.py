@@ -8,9 +8,9 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from email.mime.text import MIMEText
 
 API_TOKEN = "8487130668:AAG5fwf3HXSvWfKufZVs5cAKEvrBZ6E51uM"  # <-- o'z tokeningni qo'y
-EMAIL_SENDER = "malika-magnat@mail.ru"
+EMAIL_SENDER = "malikamagnat92@gmail.com"
 EMAIL_PASSWORD = "lbyz qzyx wupq pbkz"  # <-- Gmail uchun App Password ishlatiladi
-EMAIL_RECEIVER = "malika-magnat@mail.ru"
+EMAIL_RECEIVER = "malikamagnat92@gmail.com"
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
