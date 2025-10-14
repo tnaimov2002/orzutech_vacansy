@@ -1,16 +1,12 @@
 import asyncio
-import smtplib
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from email.mime.text import MIMEText
 
-API_TOKEN = "8487130668:AAG5fwf3HXSvWfKufZVs5cAKEvrBZ6E51uM"  # <-- o'z tokeningni qo'y
-EMAIL_SENDER = "malikamagnat92@gmail.com"
-EMAIL_PASSWORD = "lbyz qzyx wupq pbkz"  # <-- Gmail uchun App Password ishlatiladi
-EMAIL_RECEIVER = "malika-magnat@mail.ru"  # <-- Yangi qabul qiluvchi pochta
+API_TOKEN = "8487130668:AAG5fwf3HXSvWfKufZVs5cAKEvrBZ6E51uM"  #
+ADMIN_ID = 927838060  #
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
@@ -29,25 +25,25 @@ class VacancyForm(StatesGroup):
 # --- Savollar ---
 questions = [
     "1. Familya ism sharifingiz?",
-    "2. Tug‘ilgan sanangiz (kun, oy, yil)?",
-    "3. Ma’lumotingiz (o‘quv yurt nomi, yil, mutaxassislik)?",
-    "4. Shu sohadagi tajribangiz (oy, yil)?",
-    "5. Qaysi chet tillarini bilasiz?",
-    "6. Oilaviy ahvolingiz (uylangan/turmushga chiqqan, yo’q)",
-    "7. Farzandlaringiz bormi (soni, jinsi)?",
-    "8. Texnik qobiliyatlaringiz (kompyuter dasturlarini ishlata olasiz)?",
-    "9. Insoniy qobilyatlaringiz (kirishuvchan, intiluvchan va h.k)?",
-    "10. Qaysi tashkilot yoki muassasalarda ishlagansiz?",
-    "11. Ish tajribangiz (lavozim, maosh)?",
-    "12. Ishdan ketish sabablari?",
-    "13. OrzuTech haqida nimalarni bilasiz?",
-    "14. Qancha maosh kutyapsiz?",
-    "15. OrzuTech bilan bir yildan keyin o‘zingizni qanday tasavvur qilasiz?",
-    "16. Nimalarga qiziqasiz (hobbingiz)?",
-    "17. Haydovchilik guvohnomangiz bormi (toifa, berilgan sana)?",
-    "18. Kelayotgan ikki yildagi eng muhim rejalaringiz?",
-    "19. Siz uchun eng muhimi (mansab, insoniylik, halollik, pul va b)?",
-    "20. So‘rovnoma to‘ldirilgan sana?",
+    "2. Tug’ilgan sanangiz (kun, oy, yil)?",
+    "3. Ma’lumotingiz (o’rta maxsus, bakalavr, magistr, PhD)",
+    "4. O’quv yurti nomi, tugatgan yil?",
+    "5. Mutaxassislik nomi?",
+    "6. Qaysi chet tillarini bilasiz?",
+    "7. Oilaviy ahvolingiz (uylangan/turmushga chiqqan, yo’q)",
+    "8. Farzandlaringiz bormi (soni, jinsi)?",
+    "9. Texnik qobiliyatlaringiz (qaysi kompyuter dasturlarini ishlata olasiz)?",
+    "10. Insoniy qobilyatlaringiz (ko’nikuvchan, kirishuvchan, intiluvchan, qiziquvchan va h.k)?",
+    "11. Qaysi tashkilot yoki muassasalarda ishlagansiz?",
+    "12. Qaysi lavozimlarda ishlagansiz? (oy,yil/maosh)",
+    "13. Ishdan ketish sabablari?",
+    "14. ORZUTECH haqida nimalarni bilasiz?",
+    "15. ORZUTECH dan qancha miqdorda maosh kutyapsiz?",
+    "16. ORZUTECH bilan bir yildan keyin o’zingizni qanday tasavvur qilasiz?",
+    "17. Nimalarga qiziqasiz (hobbingiz)?",
+    "18. Haydovchilik guvohnomangiz bormi (toifa, berilgan sana)?",
+    "19. Kelayotgan ikki yildagi eng muhim reja va maqsadlaringiz?",
+    "20. Siz uchun eng muhimi (mansab, insoniylik, halollik, pul va b)?",
 ]
 
 
@@ -80,7 +76,7 @@ async def process_contact(msg: types.Message, state: FSMContext):
     vacancies = [
         "Sotuvchi", "Haydovchi", "Omborchi", "Savdo mutaxassisi", "Broker",
         "SMM mutaxassisi", "Grafik dizayner", "Dasturchi", "Hisobchi",
-        "Sozlovchi usta", "Avtoturargoh nazoratchisi", "Logist",
+        "Sozlovchi usta (kompyuter qurilmalari bo’yicha)", "Avtoturargoh nazoratchisi", "Logist",
         "Yuristkonsult", "Radioelektron texnik-montajchi",
         "Telemexanika muhandisi"
     ]
@@ -125,9 +121,8 @@ async def handle_resume_choice(msg: types.Message, state: FSMContext):
 # --- Rezyume faylini qabul qilish ---
 @dp.message(VacancyForm.upload_resume, F.document)
 async def handle_resume_file(msg: types.Message, state: FSMContext):
-    file_info = await bot.get_file(msg.document.file_id)
-    file_path = file_info.file_path
-    await state.update_data(resume_file=file_path)
+    file = msg.document.file_id
+    await state.update_data(resume_file=file)
     await msg.answer("✅ Rezyume qabul qilindi!\nEndi savol-javob jarayoniga o‘tamiz.", reply_markup=types.ReplyKeyboardRemove())
     await msg.answer(questions[0])
     await state.update_data(answers=[])
@@ -164,7 +159,7 @@ async def consent_handler(msg: types.Message, state: FSMContext):
     data = await state.get_data()
 
     if msg.text == "✅ Roziman":
-        await send_email(data)
+        await send_to_admin(data, msg.from_user.id)
         await msg.answer(
             "✅ Barcha javoblar qabul qilindi.\nSo‘rovnomaga javob berganingiz uchun rahmat!\nTez orada siz bilan bog‘lanamiz.",
             reply_markup=types.ReplyKeyboardRemove()
@@ -178,26 +173,21 @@ async def consent_handler(msg: types.Message, state: FSMContext):
     await state.clear()
 
 
-# --- Email yuborish funksiyasi ---
-async def send_email(data):
+# --- Admin (profil) ga yuborish ---
+async def send_to_admin(data, user_id):
     text = f"📩 Yangi so‘rovnoma:\n\n"
-    text += f"Ism: {data.get('name')}\nTelefon: {data.get('contact')}\nVakansiya: {data.get('vacancy')}\n\n"
+    text += f"👤 Ism: {data.get('name')}\n📞 Telefon: {data.get('contact')}\n💼 Vakansiya: {data.get('vacancy')}\n\n"
 
     for q, a in zip(questions, data.get('answers', [])):
         text += f"{q}\n👉 {a}\n\n"
 
-    msg = MIMEText(text)
-    msg["Subject"] = "Yangi Orzutech vakansiya so‘rovnomasi"
-    msg["From"] = EMAIL_SENDER
-    msg["To"] = EMAIL_RECEIVER
+    await bot.send_message(ADMIN_ID, text)
 
-    try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(EMAIL_SENDER, EMAIL_PASSWORD)
-            server.send_message(msg)
-        print("✅ Email yuborildi")
-    except Exception as e:
-        print("❌ Email yuborishda xatolik:", e)
+    # Agar rezyume fayli mavjud bo‘lsa, uni yuborish
+    if "resume_file" in data:
+        await bot.send_document(ADMIN_ID, data["resume_file"])
+
+    await bot.send_message(ADMIN_ID, f"🆔 Foydalanuvchi ID: {user_id}")
 
 
 # --- Run ---
@@ -208,4 +198,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
