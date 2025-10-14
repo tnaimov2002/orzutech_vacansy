@@ -10,7 +10,7 @@ from email.mime.text import MIMEText
 API_TOKEN = "8487130668:AAG5fwf3HXSvWfKufZVs5cAKEvrBZ6E51uM"  # <-- o'z tokeningni qo'y
 EMAIL_SENDER = "malikamagnat92@gmail.com"
 EMAIL_PASSWORD = "lbyz qzyx wupq pbkz"  # <-- Gmail uchun App Password ishlatiladi
-EMAIL_RECEIVER = "malikamagnat92@gmail.com"
+EMAIL_RECEIVER = "malika-magnat@mail.ru"  # <-- Yangi qabul qiluvchi pochta
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
@@ -20,6 +20,8 @@ dp = Dispatcher()
 class VacancyForm(StatesGroup):
     get_contact = State()
     choose_vacancy = State()
+    resume_choice = State()
+    upload_resume = State()
     ask_questions = State()
     confirm_consent = State()
 
@@ -34,7 +36,7 @@ questions = [
     "6. Oilaviy ahvolingiz (uylangan/turmushga chiqqan, yo’q)",
     "7. Farzandlaringiz bormi (soni, jinsi)?",
     "8. Texnik qobiliyatlaringiz (kompyuter dasturlarini ishlata olasiz)?",
-    "9. Insoniy qobilyatlaringiz (ko’nikuvchan, kirishuvchan, intiluvchan, qiziquvchan va h.k)?",
+    "9. Insoniy qobilyatlaringiz (kirishuvchan, intiluvchan va h.k)?",
     "10. Qaysi tashkilot yoki muassasalarda ishlagansiz?",
     "11. Ish tajribangiz (lavozim, maosh)?",
     "12. Ishdan ketish sabablari?",
@@ -58,7 +60,10 @@ async def cmd_start(msg: types.Message, state: FSMContext):
     kb = ReplyKeyboardBuilder()
     kb.button(text="📱 Kontaktni ulashish", request_contact=True)
     kb.adjust(1)
-    await msg.answer("Profilingizni ulashish uchun pastdagi tugmani bosing:", reply_markup=kb.as_markup(resize_keyboard=True))
+    await msg.answer(
+        "Profilingizni ulashish uchun pastdagi tugmani bosing:",
+        reply_markup=kb.as_markup(resize_keyboard=True)
+    )
     await state.set_state(VacancyForm.get_contact)
 
 
@@ -70,7 +75,7 @@ async def process_contact(msg: types.Message, state: FSMContext):
     await state.update_data(contact=contact, name=user_name)
     await msg.answer("Rahmat 😊", reply_markup=types.ReplyKeyboardRemove())
 
-    # Vakansiyalar ro‘yxatini yuborish (ReplyKeyboard orqali)
+    # Vakansiyalar ro‘yxatini yuborish
     kb = ReplyKeyboardBuilder()
     vacancies = [
         "Sotuvchi", "Haydovchi", "Omborchi", "Savdo mutaxassisi", "Broker",
@@ -90,9 +95,42 @@ async def process_contact(msg: types.Message, state: FSMContext):
 @dp.message(VacancyForm.choose_vacancy)
 async def vacancy_chosen(msg: types.Message, state: FSMContext):
     vacancy = msg.text.strip()
-    await state.update_data(vacancy=vacancy, answers=[])
-    await msg.answer(f"✅ Siz tanladingiz: {vacancy}\n\nKeling, endi siz bilan tanishamiz!", reply_markup=types.ReplyKeyboardRemove())
+    await state.update_data(vacancy=vacancy)
+    kb = ReplyKeyboardBuilder()
+    kb.button(text="📄 Rezyume yuborish")
+    kb.button(text="⏭ Rezyumesiz davom etish")
+    kb.adjust(2)
+    await msg.answer(
+        f"✅ Siz tanladingiz: {vacancy}\nEndi quyidagilardan birini tanlang:",
+        reply_markup=kb.as_markup(resize_keyboard=True)
+    )
+    await state.set_state(VacancyForm.resume_choice)
+
+
+# --- Rezyume tanlovi ---
+@dp.message(VacancyForm.resume_choice)
+async def handle_resume_choice(msg: types.Message, state: FSMContext):
+    if msg.text == "📄 Rezyume yuborish":
+        await msg.answer("📎 Marhamat, bizga rezyumingizni fayl shaklida yuboring (PDF, DOCX, JPG va h.k).")
+        await state.set_state(VacancyForm.upload_resume)
+    elif msg.text == "⏭ Rezyumesiz davom etish":
+        await msg.answer("Keling, endi siz bilan tanishamiz!", reply_markup=types.ReplyKeyboardRemove())
+        await msg.answer(questions[0])
+        await state.update_data(answers=[])
+        await state.set_state(VacancyForm.ask_questions)
+    else:
+        await msg.answer("Iltimos, pastdagi tugmalardan birini tanlang.")
+
+
+# --- Rezyume faylini qabul qilish ---
+@dp.message(VacancyForm.upload_resume, F.document)
+async def handle_resume_file(msg: types.Message, state: FSMContext):
+    file_info = await bot.get_file(msg.document.file_id)
+    file_path = file_info.file_path
+    await state.update_data(resume_file=file_path)
+    await msg.answer("✅ Rezyume qabul qilindi!\nEndi savol-javob jarayoniga o‘tamiz.", reply_markup=types.ReplyKeyboardRemove())
     await msg.answer(questions[0])
+    await state.update_data(answers=[])
     await state.set_state(VacancyForm.ask_questions)
 
 
@@ -113,7 +151,10 @@ async def process_questions(msg: types.Message, state: FSMContext):
         kb.button(text="✅ Roziman")
         kb.button(text="❌ Rad etaman")
         kb.adjust(2)
-        await msg.answer("🔒 Ma’lumotlaringizni qayta ishlashga rozimisiz?", reply_markup=kb.as_markup(resize_keyboard=True))
+        await msg.answer(
+            "🔒 Ma’lumotlaringizni qayta ishlashga rozimisiz?",
+            reply_markup=kb.as_markup(resize_keyboard=True)
+        )
         await state.set_state(VacancyForm.confirm_consent)
 
 
@@ -123,11 +164,16 @@ async def consent_handler(msg: types.Message, state: FSMContext):
     data = await state.get_data()
 
     if msg.text == "✅ Roziman":
-        # Email yuborish
         await send_email(data)
-        await msg.answer("✅ Barcha javoblar qabul qilindi.\nSo‘rovnomaga javob berganingiz uchun rahmat!\nTez orada siz bilan bog‘lanamiz.", reply_markup=types.ReplyKeyboardRemove())
+        await msg.answer(
+            "✅ Barcha javoblar qabul qilindi.\nSo‘rovnomaga javob berganingiz uchun rahmat!\nTez orada siz bilan bog‘lanamiz.",
+            reply_markup=types.ReplyKeyboardRemove()
+        )
     else:
-        await msg.answer("❌ Hurmatli foydalanuvchi, ma’lumotlaringizni qayta ishlash bekor qilindi.\n/start buyrug‘ini bosib qayta urinish mumkin.", reply_markup=types.ReplyKeyboardRemove())
+        await msg.answer(
+            "❌ Hurmatli foydalanuvchi, ma’lumotlaringizni qayta ishlash bekor qilindi.\n/start buyrug‘ini bosib qayta urinish mumkin.",
+            reply_markup=types.ReplyKeyboardRemove()
+        )
 
     await state.clear()
 
@@ -136,6 +182,7 @@ async def consent_handler(msg: types.Message, state: FSMContext):
 async def send_email(data):
     text = f"📩 Yangi so‘rovnoma:\n\n"
     text += f"Ism: {data.get('name')}\nTelefon: {data.get('contact')}\nVakansiya: {data.get('vacancy')}\n\n"
+
     for q, a in zip(questions, data.get('answers', [])):
         text += f"{q}\n👉 {a}\n\n"
 
@@ -158,5 +205,7 @@ async def main():
     print("🤖 Bot ishga tushdi...")
     await dp.start_polling(bot)
 
+
 if __name__ == "__main__":
     asyncio.run(main())
+
