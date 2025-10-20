@@ -30,7 +30,7 @@ questions = [
     "4. O’quv yurti nomi, tugatgan yil?",
     "5. Mutaxassislik nomi?",
     "6. Qaysi chet tillarini bilasiz?",
-    "7. Oilaviy ahvolingiz (uylangan/turmushga chiqqan, yo’q)",
+    "7. Oilaviy ahvolingiz (uylangan/turmushga chiqqan/yo’q)",
     "8. Farzandlaringiz bormi (soni, jinsi)?",
     "9. Texnik qobiliyatlaringiz (qaysi kompyuter dasturlarini ishlata olasiz)?",
     "10. Insoniy qobilyatlaringiz (ko’nikuvchan, kirishuvchan, intiluvchan, qiziquvchan va h.k)?",
@@ -43,7 +43,7 @@ questions = [
     "17. Nimalarga qiziqasiz (hobbingiz)?",
     "18. Haydovchilik guvohnomangiz bormi (toifa, berilgan sana)?",
     "19. Kelayotgan ikki yildagi eng muhim reja va maqsadlaringiz?",
-    "20. Siz uchun eng muhimi (mansab, insoniylik, halollik, pul va b)?",
+    "20. Siz uchun eng muhimi (mansab, insoniylik, halollik, pul va h.k)?",
 ]
 
 
@@ -76,9 +76,8 @@ async def process_contact(msg: types.Message, state: FSMContext):
     vacancies = [
         "Sotuvchi", "Haydovchi", "Omborchi", "Savdo mutaxassisi", "Broker",
         "SMM mutaxassisi", "Grafik dizayner", "Dasturchi", "Hisobchi",
-        "Sozlovchi usta (kompyuter qurilmalari bo’yicha)", "Avtoturargoh nazoratchisi", "Logist",
-        "Yuristkonsult", "Radioelektron texnik-montajchi",
-        "Telemexanika muhandisi"
+        "Sozlovchi usta (kompyuter qurilmalari bo’yicha)", "Logist",
+        "Yuristkonsult", "Kamera va xavfsizlik qurilmalari montajchisi"
     ]
     for v in vacancies:
         kb.button(text=v)
