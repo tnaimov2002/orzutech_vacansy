@@ -75,7 +75,7 @@ async def process_contact(msg: types.Message, state: FSMContext):
     # Vakansiyalar ro‘yxatini yuborish
     kb = ReplyKeyboardBuilder()
     vacancies = [
-        "Sotuvchi", "Haydovchi", "Omborchi", "Savdo mutaxassisi", "Broker",
+        "Sotuvchi", "Haydovchi", "Omborchi", "Oshpaz", "Farrosh", "Savdo mutaxassisi", "Broker",
         "SMM mutaxassisi", "Grafik dizayner", "Dasturchi", "Hisobchi",
         "Sozlovchi usta (kompyuter qurilmalari bo’yicha)", "Logist",
         "Yuristkonsult", "Kamera va xavfsizlik qurilmalari montajchisi"
